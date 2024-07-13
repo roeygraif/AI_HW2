@@ -5,7 +5,25 @@ import random
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
-    robot = 
+    robot = env.get_robot(robot_id)
+    package = env.packages[robot_id]
+    charging_station = env.charge_stations[robot_id]    #TODO ask if robot_id=0 for one and 1 for the other robot
+
+    if package:
+        dist_to_goal = manhattan_distance(robot.position, package.destination)
+    else:
+        dist_to_goal = float('inf')
+
+    if not package:
+        dist_to_package = manhattan_distance(robot.position, package.position)
+    else:
+        dist_to_package = 0
+
+    dist_to_charging_station = manhattan_distance(robot.position, charging_station.position)
+    
+    
+    heuristic_value = (10 / (dist_to_goal + 1)) + (5 / (dist_to_package + 1)) + (robot.battery / (dist_to_charging_station + 1))
+    return heuristic_value
 
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
