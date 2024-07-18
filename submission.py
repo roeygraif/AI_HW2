@@ -8,24 +8,21 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     robot = env.get_robot(robot_id)
     package = robot.package
     charging_station = env.charge_stations[robot_id]
-    goal_dist = 0
-    min_dist_to_package = 0
+    bonus = 0
     dist_to_charging_station = manhattan_distance(robot.position, charging_station.position)
-
+    charging_weight = 0
+    bonus = 0
     if package:
-        goal_dist = manhattan_distance(robot.position, package.destination)
+        target_dist = manhattan_distance(robot.position, package.destination)
+        bonus = 2*manhattan_distance(package.position, package.destination)
     else:
-        min_dist_to_package = min([manhattan_distance(robot.position, package.position) for package in env.packages if package.on_board])
+        target_dist = min([manhattan_distance(robot.position, package.position) for package in env.packages if package.on_board])
 
-    
 
-    goal_weight = 2.0
-    package_weight = 1.5
-    charging_weight = 1.0
+    if robot.battery <= dist_to_charging_station:
+        charging_weight = 10 - dist_to_charging_station
+    return 100-target_dist + 200*robot.credit + 10*bonus + 10000 * charging_weight
 
-    # Calculate the final heuristic value
-    heuristic_value = (goal_weight * goal_dist) + (package_weight * min_dist_to_package) - (charging_weight * (dist_to_charging_station / (robot.battery + 1)))
-    return heuristic_value
 
 
 class AgentGreedyImproved(AgentGreedy):
