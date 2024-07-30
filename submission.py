@@ -6,23 +6,39 @@ import numpy as np
 from func_timeout import func_timeout, FunctionTimedOut
 
 # TODO: section a : 3
+#def charge(env: WarehouseEnv, robot_id: int, dist_to_charging_station, target_dist):
+#    robot = env.get_robot(robot_id)
+#    rival_robot = env.get_robot((robot_id+1)%2)
+#    if rival_robot.credit > robot.credit and dist_to_charging_station < robot.battery and dist_to_charging_station > robot.battery-3 and robot.credit>0:
+#        if robot.package:
+#            return True
+#        else:
+#            package = [package for package in env.packages if manhattan_distance(package.position, robot.position)==target_dist and package.on_board][0]
+#            if target_dist + manhattan_distance(package.position, package.destination) > robot.battery and robot.credit>0:
+#                return True
+#    return False
+        
+
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     robot = env.get_robot(robot_id)
+    rival_robot = env.get_robot((robot_id+1)%2)
     package = robot.package
-    charging_station = env.charge_stations[robot_id]
     bonus = 0
-    dist_to_charging_station = manhattan_distance(robot.position, charging_station.position)
-    charging_weight = 0
+    losing_weight = 0
     if package:
         target_dist = manhattan_distance(robot.position, package.destination)
         bonus = 2*manhattan_distance(package.position, package.destination)
     else:
         target_dist = min([manhattan_distance(robot.position, package.position) for package in env.packages if package.on_board])
 
+    if rival_robot.credit > robot.credit:
+        losing_weight = -1
 
-    if robot.battery <= dist_to_charging_station:
-        charging_weight = 10 - dist_to_charging_station
-    return 100-target_dist + 2000*robot.credit + 10*bonus + 1000 * charging_weight
+
+    return 100-target_dist + 30*robot.credit + 30*bonus + 1000 * losing_weight
+
+
+
 
 
 
