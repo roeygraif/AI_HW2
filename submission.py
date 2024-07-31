@@ -31,11 +31,7 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     else:
         target_dist = min([manhattan_distance(robot.position, package.position) for package in env.packages if package.on_board])
 
-    if rival_robot.credit > robot.credit:
-        losing_weight = -1
-
-
-    return 100-target_dist + 30*robot.credit + 30*bonus + 1000 * losing_weight
+    return 20-target_dist + 40*robot.credit + 20*bonus 
 
 
 
