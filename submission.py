@@ -6,32 +6,35 @@ import numpy as np
 from func_timeout import func_timeout, FunctionTimedOut
 
 # TODO: section a : 3
-#def charge(env: WarehouseEnv, robot_id: int, dist_to_charging_station, target_dist):
-#    robot = env.get_robot(robot_id)
-#    rival_robot = env.get_robot((robot_id+1)%2)
-#    if rival_robot.credit > robot.credit and dist_to_charging_station < robot.battery and dist_to_charging_station > robot.battery-3 and robot.credit>0:
-#        if robot.package:
-#            return True
-#        else:
-#            package = [package for package in env.packages if manhattan_distance(package.position, robot.position)==target_dist and package.on_board][0]
-#            if target_dist + manhattan_distance(package.position, package.destination) > robot.battery and robot.credit>0:
-#                return True
-#    return False
+def charge(env: WarehouseEnv, robot_id: int, dist_to_charging_station, target_dist):
+    robot = env.get_robot(robot_id)
+    rival_robot = env.get_robot((robot_id+1)%2)
+    if rival_robot.credit > robot.credit and dist_to_charging_station < robot.battery and dist_to_charging_station > robot.battery-3 and robot.credit>0:
+        if robot.package:
+            return True
+        else:
+            package = [package for package in env.packages if manhattan_distance(package.position, robot.position)==target_dist and package.on_board][0]
+            if target_dist + manhattan_distance(package.position, package.destination) > robot.battery and robot.credit>0:
+                return True
+    return False
         
 
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     robot = env.get_robot(robot_id)
-    rival_robot = env.get_robot((robot_id+1)%2)
     package = robot.package
     bonus = 0
-    losing_weight = 0
+    losing_bonus = 0
+    dist_to_charging_station = min([manhattan_distance(chargeS.position, robot.position) for chargeS in env.charge_stations])
     if package:
         target_dist = manhattan_distance(robot.position, package.destination)
         bonus = 2*manhattan_distance(package.position, package.destination)
     else:
         target_dist = min([manhattan_distance(robot.position, package.position) for package in env.packages if package.on_board])
-
-    return 20-target_dist + 40*robot.credit + 20*bonus 
+    if charge(env, robot_id, dist_to_charging_station, target_dist):
+        target_dist = dist_to_charging_station
+    if robot.credit < env.get_robot((robot_id+1)%2).credit:
+        losing_bonus = -1000
+    return 20-target_dist + 40*robot.credit + 20*bonus + losing_bonus
 
 
 
