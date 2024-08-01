@@ -194,13 +194,7 @@ class AgentExpectimax(Agent):
         if env.done() or tree_height == 0:
             return smart_heuristic(env,agent_id)
         child_ops ,children_env = self.successors(env,turn)
-        if turn == agent_id:
-            current_max = (-1)*np.inf
-            for child_env in children_env:
-                val = self.RB_expectimax(child_env, agent_id, tree_height - 1, (turn+1)%2)
-                current_max = max(current_max,val)
-            return current_max
-        else:
+        if turn != agent_id:
             num_ops = len(child_ops)
             sum_val = 0
             val = 0
@@ -219,6 +213,13 @@ class AgentExpectimax(Agent):
                     val = (1/(num_ops)) * self.RB_expectimax(child_env, agent_id, tree_height - 1, (turn+1)%2)
                 sum_val = sum_val + val
             return sum_val
+        else:
+            current_max = (-1)*np.inf
+            for child_env in children_env:
+                val = self.RB_expectimax(child_env, agent_id, tree_height - 1, (turn+1)%2)
+                current_max = max(current_max,val)
+            return current_max
+        
 
 
 
